@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import os
 
 from sklearn.cluster import DBSCAN
@@ -17,52 +18,44 @@ st.set_page_config(
     layout="wide"
 )
 
+# --------------------------------------------------
+# Safe Background Styling (Minimal + Stable)
+# --------------------------------------------------
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #0E1117;
+        color: white;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("🚕 NYC Taxi Pickup Clustering using DBSCAN")
+st.caption("Density-Based Spatial Clustering Visualization")
 
 # --------------------------------------------------
-# Safe Dataset Loader
+# Load Dataset (Cloud Safe)
 # --------------------------------------------------
 @st.cache_data
 def load_data():
     try:
-        file_path = os.path.join(
-            os.path.dirname(__file__),
-            "NewYorkCityTaxiTripDuration.csv"
-        )
-
-        if not os.path.exists(file_path):
-            return None
-
-        df = pd.read_csv(
-            file_path,
-            usecols=["pickup_latitude", "pickup_longitude"]
-        )
-
+        df = pd.read_csv("NewYorkCityTaxiTripDuration.csv",
+                         usecols=["pickup_latitude", "pickup_longitude"])
         df = df.dropna()
-
-        if df.empty:
-            return None
-
         return df
-
-    except:
+    except Exception as e:
         return None
 
-
-# --------------------------------------------------
-# Load Data
-# --------------------------------------------------
 df = load_data()
 
 if df is None:
-    st.error("❌ Dataset not found OR invalid format.")
-    st.info("Make sure NewYorkCityTaxiTripDuration.csv is in SAME folder as app.py")
+    st.error("❌ Dataset not found.")
     st.stop()
 
-st.success(f"Dataset Loaded Successfully ✅ | Total Records: {len(df)}")
+st.success(f"Dataset Loaded ✅ | Records: {len(df)}")
 
 # --------------------------------------------------
-# Sidebar
+# Sidebar Controls
 # --------------------------------------------------
 st.sidebar.header("⚙️ DBSCAN Parameters")
 
@@ -101,43 +94,46 @@ col1.metric("Clusters", n_clusters)
 col2.metric("Noise Points", n_noise)
 col3.metric("Noise Ratio", round(noise_ratio, 4))
 
-if silhouette is not None:
+if silhouette:
     st.info(f"Silhouette Score: {round(silhouette, 4)}")
-else:
-    st.warning("Silhouette Score Not Applicable")
 
 # --------------------------------------------------
-# Plot
+# Plot (Colorful + Dark Friendly)
 # --------------------------------------------------
-st.subheader("Cluster Visualization")
+st.subheader("📊 Cluster Visualization")
 
 fig, ax = plt.subplots(figsize=(8, 6))
+fig.patch.set_facecolor('#0E1117')
+ax.set_facecolor('#0E1117')
 
 unique_labels = set(labels)
+colors = cm.rainbow(np.linspace(0, 1, len(unique_labels)))
 
-for label in unique_labels:
+for label, color in zip(unique_labels, colors):
     if label == -1:
         ax.scatter(
             X_scaled[labels == label, 0],
             X_scaled[labels == label, 1],
-            c="black",
+            c="white",
             marker="x",
-            s=10,
+            s=15,
             label="Noise"
         )
     else:
         ax.scatter(
             X_scaled[labels == label, 0],
             X_scaled[labels == label, 1],
-            s=10,
+            color=color,
+            s=15,
             label=f"Cluster {label}"
         )
 
-ax.set_xlabel("Latitude (Scaled)")
-ax.set_ylabel("Longitude (Scaled)")
+ax.set_xlabel("Latitude (Scaled)", color="white")
+ax.set_ylabel("Longitude (Scaled)", color="white")
+ax.tick_params(colors='white')
 ax.legend()
 
 st.pyplot(fig)
 
 st.markdown("---")
-st.markdown("Built with Streamlit 🚀")
+st.markdown("🚀 Built with Streamlit")
