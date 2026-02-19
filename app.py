@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import os
 
 from sklearn.cluster import DBSCAN
@@ -18,36 +17,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --------------------------------------------------
-# Custom Styling
-# --------------------------------------------------
-st.markdown("""
-    <style>
-    .stApp {
-        background: linear-gradient(to right, #141E30, #243B55);
-        color: white;
-    }
-    h1 {
-        text-align: center;
-        color: #00F5A0;
-    }
-    .stMetric {
-        background-color: rgba(255,255,255,0.08);
-        padding: 15px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.2);
-    }
-    section[data-testid="stSidebar"] {
-        background-color: #111827;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# --------------------------------------------------
-# Title
-# --------------------------------------------------
-st.markdown("<h1>🚕 NYC Taxi Pickup Clustering using DBSCAN</h1>", unsafe_allow_html=True)
-st.markdown("<center><span style='color:#B0BEC5'>Density-Based Spatial Clustering Visualization</span></center>", unsafe_allow_html=True)
+st.title("🚕 NYC Taxi Pickup Clustering using DBSCAN")
 
 # --------------------------------------------------
 # Safe Dataset Loader
@@ -139,45 +109,35 @@ else:
 # --------------------------------------------------
 # Plot
 # --------------------------------------------------
-st.subheader("📊 Cluster Visualization")
+st.subheader("Cluster Visualization")
 
 fig, ax = plt.subplots(figsize=(8, 6))
 
 unique_labels = set(labels)
-colors = cm.rainbow(np.linspace(0, 1, len(unique_labels)))
 
-for label, color in zip(unique_labels, colors):
+for label in unique_labels:
     if label == -1:
         ax.scatter(
             X_scaled[labels == label, 0],
             X_scaled[labels == label, 1],
-            c="white",
+            c="black",
             marker="x",
-            s=15,
+            s=10,
             label="Noise"
         )
     else:
         ax.scatter(
             X_scaled[labels == label, 0],
             X_scaled[labels == label, 1],
-            color=color,
-            s=15,
+            s=10,
             label=f"Cluster {label}"
         )
 
-ax.set_facecolor("#0E1117")
-ax.set_xlabel("Latitude (Scaled)", color="white")
-ax.set_ylabel("Longitude (Scaled)", color="white")
-ax.tick_params(colors='white')
+ax.set_xlabel("Latitude (Scaled)")
+ax.set_ylabel("Longitude (Scaled)")
 ax.legend()
 
 st.pyplot(fig)
 
-# --------------------------------------------------
-# Footer
-# --------------------------------------------------
-st.markdown("""
-<div style='text-align:center; color:#9CA3AF; padding-top:20px;'>
-Built with ❤️ using Streamlit | DBSCAN Clustering Project
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("Built with Streamlit 🚀")
